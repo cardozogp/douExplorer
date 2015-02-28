@@ -1,2 +1,2 @@
 # douExplorer
-Swing e linha de comando para obter DOUs
+Swing e linha de comando para baixar DOUs
