@@ -70,8 +70,8 @@ public class Dou {
 		
 		try {
 			dou = new Dou();
-			//dou.obterlinksDou("dataprev", "20/11", "29/12", "2014", Constantes.get("Diretorio"), true);
-			dou.pesquisaPorTermo("dataprev", "20/11/2014", "29/12/2014", Constantes.get("Diretorio"), true);
+			//dou.obterlinksDou("teste", "20/11", "29/12", "2014", Constantes.get("Diretorio"), true);
+			dou.pesquisaPorTermo("teste", "20/11/2014", "29/12/2014", Constantes.get("Diretorio"), true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

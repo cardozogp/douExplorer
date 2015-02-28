@@ -43,7 +43,7 @@ public class ImpNacSimulator {
 		
 
 		// Change the value of the text field
-		txtPesquisa.setValueAttribute("dataprev");
+		txtPesquisa.setValueAttribute("teste");
 		txtDtInicio.setValueAttribute("15/12");
 		txtDtFim.setValueAttribute("29/12");
 		slcDtFim.getOptionByValue("2014").setSelected(true);

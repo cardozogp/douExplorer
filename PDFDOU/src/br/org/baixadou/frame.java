@@ -506,7 +506,7 @@ public class frame extends javax.swing.JFrame {
 		initPanelTermo();
 
 		jLbllTermoBuscaDou.setText("Informe o termo:");
-		jTxtTermoBuscaEmDou.setText("dataprev");
+		jTxtTermoBuscaEmDou.setText("teste");
 		
 		jLbllDataIni.setText("Data inicial:");
 		jTxtDataIni.setText("20/11");
