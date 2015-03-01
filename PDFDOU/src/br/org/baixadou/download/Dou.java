@@ -12,18 +12,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.apache.commons.logging.Log;
 import org.apache.pdfbox.util.PDFMergerUtility;
 import org.joda.time.DateTime;
-import org.joda.time.Months;
-import org.joda.time.Period;
 
+import br.org.baixadou.Constantes;
 import br.org.baixadou.entity.TipoDou;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -36,46 +33,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 
-public class Dou {
-	private static ResourceBundle rb;
-	private static HashMap<String, String> Constantes;
-	
-	private static void putForMe(String termo){
-		Constantes.put(termo, rb.getString(termo));
-	}
-	
-	public Dou(){
-		Constantes = new HashMap<String, String>();
-		rb = ResourceBundle.getBundle("config");
-		
-		putForMe("SiteInicial");
-		putForMe("SiteImprensaNacionaNumeroPaginas");
-		putForMe("SiteImprensaNacionaPDF");
-		putForMe("SubstituicaoJornal");
-		putForMe("SubstituicaoPagina");
-		putForMe("SubstituicaoData");
-		
-		putForMe("Diretorio");
-		
-		putForMe("LimiteMesesSiteImp");
-		putForMe("XPath1oItemListaLinks");
-		putForMe("Substituicao1oItemListaLinks");
-		putForMe("NenhumItemEncontrado");
-		putForMe("XPath2aPagina");
-		putForMe("ElementoUltimaPagina");
-	}
-	
-	public static void main(String[] args) {
-		Dou dou;
-		
-		try {
-			dou = new Dou();
-			//dou.obterlinksDou("teste", "20/11", "29/12", "2014", Constantes.get("Diretorio"), true);
-			dou.pesquisaPorTermo("teste", "20/11/2014", "29/12/2014", Constantes.get("Diretorio"), true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+public class Dou {	
+	private  ResourceBundle Constantes = ResourceBundle.getBundle("config");
 
 	private int identificaNumeroPaginasJornal(String html){
 		return Integer.parseInt(html.substring(
@@ -133,7 +92,7 @@ public class Dou {
 
 		
 		//links = obterlinksDou(termo, dtIni, dtFim, ano, diretorio, delFiles);
-		//downloadAvulso(links, termo, dtIni, dtFim, ano, Constantes.get("Diretorio"), true);
+		//downloadAvulso(links, termo, dtIni, dtFim, ano, Constantes.getString("Diretorio"), true);
 	}
 
 	/**
@@ -171,9 +130,9 @@ public class Dou {
 		// link para o site da imprensa nacional que mostra o numero de páginas
 		// de cada caderno
 		String linkComQtdPaginas = 
-			Constantes.get("SiteImprensaNacionaNumeroPaginas")
-				.replace(Constantes.get("SubstituicaoJornal"), jornal.toString())
-				.replace(Constantes.get("SubstituicaoData"), DATA);
+			Constantes.getString("SiteImprensaNacionaNumeroPaginas")
+				.replace(Constantes.getString("SubstituicaoJornal"), jornal.toString())
+				.replace(Constantes.getString("SubstituicaoData"), DATA);
 		
 		// captura o código fonte HTML do link acima
 		String fonte_html = getHtmlCode(linkComQtdPaginas).toString();
@@ -194,10 +153,10 @@ public class Dou {
 				output = new FileOutputStream(fileName);
 				// link para o site da imprensa nacional de onde os
 				// cadernos/jornais serão baixados
-				String site = Constantes.get("SiteImprensaNacionaPDF")
-						.replace(Constantes.get("SubstituicaoJornal"), jornal.toString())
-						.replace(Constantes.get("SubstituicaoPagina"), String.valueOf(i))
-						.replace(Constantes.get("SubstituicaoData"), DATA);
+				String site = Constantes.getString("SiteImprensaNacionaPDF")
+						.replace(Constantes.getString("SubstituicaoJornal"), jornal.toString())
+						.replace(Constantes.getString("SubstituicaoPagina"), String.valueOf(i))
+						.replace(Constantes.getString("SubstituicaoData"), DATA);
 
 				URL url = new URL(site);
 
@@ -274,7 +233,9 @@ public class Dou {
 		System.out.println("Iniciando download de cada página");
 		try {
 			for (int i = 0; i < links.size(); i++) {
-				System.out.print("Pagina " + String.valueOf(i) + 1);
+				System.out.printf(
+					String.format("Pagina %0" + (links.size()/5) + "d",  i + 1)
+				);
 				
 				IdentificadorDocumento.clear();
 				
@@ -383,8 +344,8 @@ public class Dou {
 		//webClient.getOptions().
 		
 		// Get the first page
-		System.out.println("Acessando " + Constantes.get("SiteInicial"));
-		final HtmlPage page1 = webClient.getPage(Constantes.get("SiteInicial"));
+		System.out.println("Acessando " + Constantes.getString("SiteInicial"));
+		final HtmlPage page1 = webClient.getPage(Constantes.getString("SiteInicial"));
 
 		// Get the form that we are dealing with and within that form,
 		// find the submit button and the field that we want to change.

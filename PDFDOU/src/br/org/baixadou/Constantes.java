@@ -1,20 +1,18 @@
 package br.org.baixadou;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class Constantes extends ResourceBundle{
+public final class Constantes {
 	
-	private static ResourceBundle rb;
-	private static HashMap<String, String> valores;
+	private static ResourceBundle rb = ResourceBundle.getBundle("config.properties");
+	private static HashMap<String, String> valores = new HashMap<String, String>();
 	
 	static {
-		valores = new HashMap<String, String>();
+		//valores = new HashMap<String, String>();
 		try{
-			rb = ResourceBundle.getBundle("br/org/baixadou/config.properties");
+			//rb = ResourceBundle.getBundle("br/org/baixadou/config.properties");
 			
 			putForMe("SiteInicial");
 			putForMe("SiteImprensaNacionaNumeroPaginas");
@@ -22,6 +20,8 @@ public class Constantes extends ResourceBundle{
 			putForMe("SubstituicaoJornal");
 			putForMe("SubstituicaoPagina");
 			putForMe("SubstituicaoData");
+			
+			putForMe("Diretorio");
 			
 			putForMe("LimiteMesesSiteImp");
 			putForMe("XPath1oItemListaLinks");
@@ -45,39 +45,15 @@ public class Constantes extends ResourceBundle{
 		}			
 	}
 	
-	public Constantes(){
-	
-	}
+//	private Constantes(){
+//	
+//	}
 	
 	private static void putForMe(String termo){
 		valores.put(termo, rb.getString(termo));
 	}
 	
-	public static String getConstante(String valor){
-		String retorno = null;
-		try{
-			retorno = valores.get(valor);
-		}catch(MissingResourceException | NullPointerException ex){
-			rb = ResourceBundle.getBundle("br/org/baixadou/config.properties");
-			return rb.getString(valor);
-		}
-		if (retorno == null){
-			rb = ResourceBundle.getBundle("br/org/baixadou/config.properties");
-			return rb.getString(valor);
-		}
+	public static String get(String valor){
 		return valores.get(valor);
 	}
-
-	@Override
-	protected Object handleGetObject(String key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Enumeration<String> getKeys() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
