@@ -20,14 +20,15 @@ import java.util.ResourceBundle;
 import org.apache.pdfbox.util.PDFMergerUtility;
 import org.joda.time.DateTime;
 
-import br.org.baixadou.Constantes;
 import br.org.baixadou.entity.TipoDou;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlBold;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
@@ -42,7 +43,7 @@ public class Dou {
 				html.indexOf(" scrolling") - 1).trim());
 	}
 	
-	public void pesquisaPorTermo(String termo, String dtIni, String dtFim, String diretorio, boolean delFiles) throws IOException{
+	public void pesquisaPorTermo(String termo, HashMap<String, Boolean> listaTipoDou, String dtIni, String dtFim, String diretorio, boolean delFiles) throws IOException{
 		DateTime ini = new DateTime(Integer.parseInt(dtIni.split("/")[2])
 								  , Integer.parseInt(dtIni.split("/")[1])
 								  , Integer.parseInt(dtIni.split("/")[0]),0,0);
@@ -58,6 +59,7 @@ public class Dou {
 			//TODO: Tratar mudanca de ano
 			while(work.compareTo(fim) < 0){					
 				links.addAll(obterlinksDou(termo
+						, listaTipoDou
 						, ini.getDayOfMonth() + "/" + ini.getMonthOfYear()
 						, work.getDayOfMonth() + "/" + work.getMonthOfYear()
 						, String.valueOf(work.getYear())
@@ -76,6 +78,7 @@ public class Dou {
 			}
 		}
 				links.addAll(obterlinksDou(termo
+						, listaTipoDou
 						, ini.getDayOfMonth() + "/" + ini.getMonthOfYear()
 						, fim.getDayOfMonth() + "/" + fim.getMonthOfYear()
 						, String.valueOf(fim.getYear())
@@ -228,95 +231,100 @@ public class Dou {
 		//2 data=x
 		HashMap<String, String> IdentificadorDocumento = new HashMap<String, String>();		
 		String[] partes;
-
-		// Download página por página
-		System.out.println("Iniciando download de cada página");
+		
 		try {
-			for (int i = 0; i < links.size(); i++) {
-				System.out.printf(
-					String.format("Pagina %0" + (links.size()/5) + "d",  i + 1)
-				);
-				
-				IdentificadorDocumento.clear();
-				
-				partes = links.get(i).substring(links.get(i).indexOf("?")+1).split("&");
-				
-				IdentificadorDocumento.put(partes[0].split("=")[0], partes[0].split("=")[1]);
-				IdentificadorDocumento.put(partes[1].split("=")[0], partes[1].split("=")[1]);
-				IdentificadorDocumento.put(partes[2].split("=")[0], partes[2].split("=")[1].replace("/", "-"));
-				
-				// nome do arquivo invidual
-				String fileName = diretorio
-						+ "dou_" + IdentificadorDocumento.get("jornal") 
-						+ "_pg_" + IdentificadorDocumento.get("pagina") 
-						+ "_dt_" + IdentificadorDocumento.get("data") 
-						+ ".pdf";
-				// stream para o arquivo PDF do site
-				FileOutputStream output = new FileOutputStream(fileName);
-				// link para o site da imprensa nacional de onde os
-				// cadernos/jornais serão baixados
-								
-				String site = "http://pesquisa.in.gov.br/imprensa/servlet/INPDFViewer"
-						+ links.get(i).substring(links.get(i).indexOf("?"))
-						+ "&captchafield=firistAccess";
-
-				URL url = new URL(site);
-
-				// cria uma conexão http e um buffer de dados contendo o PDF em
-				// si
-				HttpURLConnection conn = null;
-				BufferedInputStream input = null;
-				try{
-					conn = (HttpURLConnection) url
-						.openConnection();
-					input = new BufferedInputStream(
-						conn.getInputStream());
-				}catch(java.net.SocketException ex){
-					ex.printStackTrace();
-					i--;
+			if (links.size() > 0){
+				// Download página por página
+				System.out.println("Iniciando download de cada página");
+				for (int i = 0; i < links.size(); i++) {
+					System.out.printf(
+						String.format("Pagina %0" + (String.valueOf(links.size()).length()) + "d",  i + 1)
+					);
+					
+					IdentificadorDocumento.clear();
+					
+					partes = links.get(i).substring(links.get(i).indexOf("?")+1).split("&");
+					
+					IdentificadorDocumento.put(partes[0].split("=")[0], partes[0].split("=")[1]);
+					IdentificadorDocumento.put(partes[1].split("=")[0], partes[1].split("=")[1]);
+					IdentificadorDocumento.put(partes[2].split("=")[0], partes[2].split("=")[1].replace("/", "-"));
+					
+					// nome do arquivo invidual
+					String fileName = diretorio
+							+ "dou_" + IdentificadorDocumento.get("jornal") 
+							+ "_pg_" + IdentificadorDocumento.get("pagina") 
+							+ "_dt_" + IdentificadorDocumento.get("data") 
+							+ ".pdf";
+					// stream para o arquivo PDF do site
+					FileOutputStream output = new FileOutputStream(fileName);
+					// link para o site da imprensa nacional de onde os
+					// cadernos/jornais serão baixados
+									
+					String site = "http://pesquisa.in.gov.br/imprensa/servlet/INPDFViewer"
+							+ links.get(i).substring(links.get(i).indexOf("?"))
+							+ "&captchafield=firistAccess";
+	
+					URL url = new URL(site);
+	
+					// cria uma conexão http e um buffer de dados contendo o PDF em
+					// si
+					HttpURLConnection conn = null;
+					BufferedInputStream input = null;
+					try{
+						conn = (HttpURLConnection) url
+							.openConnection();
+						input = new BufferedInputStream(
+							conn.getInputStream());
+					}catch(java.net.SocketException ex){
+						ex.printStackTrace();
+						i--;
+					}
+					
+					byte[] buf = new byte[4096];
+					int len;
+					// baixa o PDF
+					while ((len = input.read(buf)) > 0)
+						output.write(buf, 0, len);
+	
+					conn.disconnect();
+					input.close();
+					output.close();
+	
+					// adiciona o nome do PDF baixado a uma lista
+						downloadedFiles.add(fileName);
+					System.out.println("..OK!");
 				}
 				
-				byte[] buf = new byte[4096];
-				int len;
-				// baixa o PDF
-				while ((len = input.read(buf)) > 0)
-					output.write(buf, 0, len);
-
-				conn.disconnect();
-				input.close();
-				output.close();
-
-				// adiciona o nome do PDF baixado a uma lista
-					downloadedFiles.add(fileName);
+				System.out.print("Juntando arquivos");
+				// Mescla os arquivos em 1 unico
+				List<InputStream> sourcePDFs = new ArrayList<InputStream>();
+				final String OUTPT_FILENAME = "DOU_Busca." + termo 
+												+ ".Inicio." + dtIni
+												+ ".Fim."	 + dtFim
+												+ ".Ano."	 + ano
+												+ ".pdf";
+	
+				for	(String fileName : downloadedFiles){ //for (int i = 0; i < links.size(); i++) {
+					//String fileName = frame.getjTxtCaminhoDiretorio().getText() + "pg_" + i + "_dou_"	+ i + ".pdf";
+					sourcePDFs.add(new FileInputStream(new File(fileName)));
+				}
+	
+				// mescla
+				PDFMergerUtility mergerUtility = new PDFMergerUtility();
+				mergerUtility.addSources(sourcePDFs);
+				mergerUtility.setDestinationFileName(diretorio + OUTPT_FILENAME);
+				mergerUtility.mergeDocuments();
 				System.out.println("..OK!");
+				
+				// Apaga os arquivos induviduais
+				if (delFiles)
+					for (String sfile : downloadedFiles) {
+						new File(sfile).delete();
+					}
+			}else{
+				System.out.println("A busca não encontrou o termo procurado.");
 			}
-			
-			System.out.print("Juntando arquivos");
-			// Mescla os arquivos em 1 unico
-			List<InputStream> sourcePDFs = new ArrayList<InputStream>();
-			final String OUTPT_FILENAME = "DOU_Busca." + termo 
-											+ ".Inicio." + dtIni
-											+ ".Fim."	 + dtFim
-											+ ".Ano."	 + ano
-											+ ".pdf";
-
-			for	(String fileName : downloadedFiles){ //for (int i = 0; i < links.size(); i++) {
-				//String fileName = frame.getjTxtCaminhoDiretorio().getText() + "pg_" + i + "_dou_"	+ i + ".pdf";
-				sourcePDFs.add(new FileInputStream(new File(fileName)));
-			}
-
-			// mescla
-			PDFMergerUtility mergerUtility = new PDFMergerUtility();
-			mergerUtility.addSources(sourcePDFs);
-			mergerUtility.setDestinationFileName(diretorio + OUTPT_FILENAME);
-			mergerUtility.mergeDocuments();
-			System.out.println("..OK!");
-			
-			// Apaga os arquivos induviduais
-			if (delFiles)
-				for (String sfile : downloadedFiles) {
-					new File(sfile).delete();
-				}
+				
 			System.out.println("Processamento terminado!");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -333,7 +341,7 @@ public class Dou {
 
 	 * @throws IOException
 	 */
-	public List<String> obterlinksDou(String termo, String dtIni, String dtFim, String ano, String diretorio, boolean delFiles) throws IOException{
+	public List<String> obterlinksDou(String termo, HashMap<String, Boolean> listaTipoDou, String dtIni, String dtFim, String ano, String diretorio, boolean delFiles) throws IOException{
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 		System.setProperty("org.apache.commons.logging.simplelog.defaultlog", "error");
 		
@@ -357,6 +365,20 @@ public class Dou {
 		final HtmlTextInput txtDtFim = form.getInputByName("edicao.dtFim");
 		final HtmlSelect slcDtFim = form.getSelectByName("edicao.ano");
 		
+		final HtmlInput chkTodos = listaTipoDou.get("TODOS") 	? form.getInputByValue("1,1000,1010,1020,2,2000,3,3000,3020,4000,5000,6000,126,4,5,6,20,21,") : null;
+		final HtmlInput chkDou1  = listaTipoDou.get("SECAO_1")  ? form.getInputByValue("1,1000,1010,1020") : null;
+		final HtmlInput chkDou2  = listaTipoDou.get("SECAO_2")  ? form.getInputByValue("2,2000") : null;
+		final HtmlInput chkDou3  = listaTipoDou.get("SECAO_3")  ? form.getInputByValue("3,3000,3020") : null;
+		final HtmlInput chkDj 	 = listaTipoDou.get("DJ") 		? form.getInputByValue("4000,5000,6000,126,4,5,6") : null;
+		final HtmlInput chkEDJF1 = listaTipoDou.get("eDJF1") 	? form.getInputByValue("20,21") : null;
+		
+		if(chkTodos !=null)	chkTodos.setChecked(true);
+		if(chkDou1  !=null)	chkDou1.setChecked(true);
+		if(chkDou2  !=null)	chkDou2.setChecked(true);
+		if(chkDou3  !=null)	chkDou3.setChecked(true);
+		if(chkDj 	!=null)	chkDj.setChecked(true);
+		if(chkEDJF1 !=null)	chkEDJF1.setChecked(true); 
+				
 		// Change the value of the text field
 		txtPesquisa.setValueAttribute(termo.trim());
 		txtDtInicio.setValueAttribute(dtIni);

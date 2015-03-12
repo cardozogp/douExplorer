@@ -5,6 +5,8 @@ public enum TipoDou {
 	SECAO_2(2),
 	SECAO_3(3),
 	ED_EXTRA(4),
+	DJ(5),
+	eDJF1(6),
 	TODOS(99);
 	
 	public int tipoDou;
